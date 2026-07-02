@@ -1,3 +1,5 @@
+import { Vehicle } from '../modules/vehicles/entities/vehicle.entity';
+import { Model } from '../modules/models/entities/model.entity';
 import { DataSourceOptions } from 'typeorm';
 
 export const typeOrmConfig = (): DataSourceOptions => ({
@@ -7,7 +9,7 @@ export const typeOrmConfig = (): DataSourceOptions => ({
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
-  entities: [],
+  entities: [Model, Vehicle],
   migrations: [__dirname + '/../database/migrations/*{.ts,.js}'],
   synchronize: false,
   logging: process.env.NODE_ENV === 'development',
