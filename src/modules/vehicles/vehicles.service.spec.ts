@@ -4,6 +4,7 @@ import { ConflictException, NotFoundException } from '@nestjs/common';
 import { VehiclesService } from './vehicles.service';
 import { Vehicle } from './entities/vehicle.entity';
 import { Model } from '../models/entities/model.entity';
+import { RedisService } from '../../redis/redis.service';
 
 describe('VehiclesService', () => {
   let service: VehiclesService;
@@ -21,6 +22,12 @@ describe('VehiclesService', () => {
     findOne: jest.fn(),
   };
 
+  const mockRedisService = {
+    get: jest.fn(),
+    set: jest.fn(),
+    del: jest.fn(),
+  };
+
   const createDto = {
     license_plate: 'ABC1D23',
     chassis: '9BWZZZ377VT004251',
@@ -35,6 +42,7 @@ describe('VehiclesService', () => {
         VehiclesService,
         { provide: getRepositoryToken(Vehicle), useValue: mockVehicleRepo },
         { provide: getRepositoryToken(Model), useValue: mockModelRepo },
+        { provide: RedisService, useValue: mockRedisService },
       ],
     }).compile();
 
@@ -69,6 +77,9 @@ describe('VehiclesService', () => {
     });
 
     it('deve criar o veículo quando model existe e não há duplicidade', async () => {
+      mockRedisService.get.mockResolvedValue(null);
+      mockRedisService.set.mockResolvedValue(undefined);
+      mockRedisService.del.mockResolvedValue(undefined);
       mockModelRepo.findOne.mockResolvedValue({ id: '1' });
 
       const qbMock = {
@@ -88,6 +99,7 @@ describe('VehiclesService', () => {
   });
   describe('findAll', () => {
     it('deve retornar uma lista de veículos com seus modelos', async () => {
+      mockRedisService.get.mockResolvedValue(null);
       const mockVehicles = [{ id: '1', license_plate: 'ABC1D23' }];
       mockVehicleRepo.find.mockResolvedValue(mockVehicles);
 
@@ -98,10 +110,39 @@ describe('VehiclesService', () => {
         relations: { model: true },
       });
     });
+    it('deve retornar a lista direto do Redis se o cache existir (Cache Hit)', async () => {
+      const mockCachedVehicles = [{ id: '1', license_plate: 'ABC1D23' }];
+      mockRedisService.get.mockResolvedValue(mockCachedVehicles);
+
+      const result = await service.findAll();
+
+      expect(result).toEqual(mockCachedVehicles);
+      expect(mockRedisService.get).toHaveBeenCalledWith('vehicles:all');
+      expect(mockVehicleRepo.find).not.toHaveBeenCalled();
+    });
+
+    it('deve buscar do banco e salvar no Redis se o cache estiver vazio (Cache Miss)', async () => {
+      const mockDbVehicles = [{ id: '1', license_plate: 'ABC1D23' }];
+
+      mockRedisService.get.mockResolvedValue(null);
+      mockVehicleRepo.find.mockResolvedValue(mockDbVehicles);
+      mockRedisService.set.mockResolvedValue(undefined);
+
+      const result = await service.findAll();
+
+      expect(result).toEqual(mockDbVehicles);
+      expect(mockRedisService.get).toHaveBeenCalledWith('vehicles:all');
+      expect(mockVehicleRepo.find).toHaveBeenCalled();
+      expect(mockRedisService.set).toHaveBeenCalledWith(
+        'vehicles:all',
+        mockDbVehicles,
+      );
+    });
   });
 
   describe('findOne', () => {
     it('deve retornar um veículo se encontrado', async () => {
+      mockRedisService.get.mockResolvedValue(null);
       const mockVehicle = { id: '1', license_plate: 'ABC1D23' };
       mockVehicleRepo.findOne.mockResolvedValue(mockVehicle);
 
@@ -121,6 +162,16 @@ describe('VehiclesService', () => {
         NotFoundException,
       );
     });
+    it('deve retornar o veículo direto do Redis se o cache existir (Cache Hit)', async () => {
+      const mockCachedVehicle = { id: '1', license_plate: 'ABC1D23' };
+      mockRedisService.get.mockResolvedValue(mockCachedVehicle);
+
+      const result = await service.findOne('1');
+
+      expect(result).toEqual(mockCachedVehicle);
+      expect(mockRedisService.get).toHaveBeenCalledWith('vehicles:id:1');
+      expect(mockVehicleRepo.findOne).not.toHaveBeenCalled();
+    });
   });
 
   describe('update', () => {
@@ -133,6 +184,9 @@ describe('VehiclesService', () => {
     };
 
     it('deve atualizar o veículo com sucesso se os dados únicos forem válidos', async () => {
+      mockRedisService.get.mockResolvedValue(null);
+      mockRedisService.set.mockResolvedValue(undefined);
+      mockRedisService.del.mockResolvedValue(undefined);
       mockVehicleRepo.findOne.mockResolvedValue(existingVehicle);
       mockModelRepo.findOne.mockResolvedValue({ id: '1' });
       const qbMock = {
@@ -180,6 +234,9 @@ describe('VehiclesService', () => {
     });
 
     it('deve passar pelas validações quando chassi e renavam forem alterados', async () => {
+      mockRedisService.get.mockResolvedValue(null);
+      mockRedisService.set.mockResolvedValue(undefined);
+      mockRedisService.del.mockResolvedValue(undefined);
       mockVehicleRepo.findOne.mockResolvedValue(existingVehicle);
       const qbMock = {
         where: jest.fn().mockReturnThis(),
@@ -204,10 +261,13 @@ describe('VehiclesService', () => {
       const mockVehicle = { id: '1', license_plate: 'ABC1D23' };
       mockVehicleRepo.findOne.mockResolvedValue(mockVehicle);
       mockVehicleRepo.remove.mockResolvedValue(undefined);
+      mockRedisService.del.mockResolvedValue(undefined);
 
       await service.remove('1');
 
       expect(mockVehicleRepo.remove).toHaveBeenCalledWith(mockVehicle);
+      expect(mockRedisService.del).toHaveBeenCalledWith('vehicles:all');
+      expect(mockRedisService.del).toHaveBeenCalledWith('vehicles:id:1');
     });
   });
 });
