@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Model } from './entities/model.entity';
@@ -36,6 +40,20 @@ export class ModelsService {
 
   async remove(id: string): Promise<void> {
     const model = await this.findOne(id);
+
+    const vehicleCount = await this.modelRepo
+      .createQueryBuilder('model')
+      .leftJoin('model.vehicles', 'vehicle')
+      .where('model.id = :id', { id })
+      .andWhere('vehicle.id IS NOT NULL')
+      .getCount();
+
+    if (vehicleCount > 0) {
+      throw new ConflictException(
+        'Não é possível remover um model com veículos vinculados',
+      );
+    }
+
     await this.modelRepo.remove(model);
   }
 }
