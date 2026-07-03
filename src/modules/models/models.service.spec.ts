@@ -51,7 +51,7 @@ describe('ModelsService', () => {
     it('deve lançar NotFoundException se o model não existir', async () => {
       jest.spyOn(repository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.findOne('uuid-invalido')).rejects.toThrow(
+      await expect(service.findOne('invalido')).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -62,17 +62,17 @@ describe('ModelsService', () => {
       const mockModel = { id: '1', name: 'Sedan' };
       jest.spyOn(repository, 'findOne').mockResolvedValue(mockModel as Model);
 
-      const result = await service.findOne('uuid-1');
+      const result = await service.findOne('1');
       expect(result).toEqual(mockModel);
       expect(mockModelRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 'uuid-1' },
+        where: { id: '1' },
       });
     });
 
     it('deve lançar NotFoundException se o model não existir', async () => {
       jest.spyOn(repository, 'findOne').mockResolvedValue(null);
 
-      await expect(service.findOne('uuid-invalido')).rejects.toThrow(
+      await expect(service.findOne('invalido')).rejects.toThrow(
         NotFoundException,
       );
     });

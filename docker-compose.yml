@@ -54,8 +54,24 @@ services:
       /bin/bash -c "
       /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P 'Aivacol123456!' -C -i /usr/config/init.sql
       "
+  redis:
+    image: redis:7-alpine
+    container_name: aivacol-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - aivacol-net
+
 volumes:
   sqlserver-data:
+  redis-data:
 
 networks:
   aivacol-net:

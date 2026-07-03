@@ -10,13 +10,16 @@ import { Vehicle } from './entities/vehicle.entity';
 import { Model } from '../models/entities/model.entity';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
+import { RedisService } from '../../redis/redis.service';
 
 @Injectable()
 export class VehiclesService {
   constructor(
     @InjectRepository(Vehicle)
     private readonly vehicleRepo: Repository<Vehicle>,
-    @InjectRepository(Model) private readonly modelRepo: Repository<Model>,
+    @InjectRepository(Model)
+    private readonly modelRepo: Repository<Model>,
+    private readonly redis: RedisService,
   ) {}
 
   async create(dto: CreateVehicleDto, createdBy: string): Promise<Vehicle> {
@@ -24,21 +27,44 @@ export class VehiclesService {
     await this.assertUnique(dto);
 
     const vehicle = this.vehicleRepo.create({ ...dto, created_by: createdBy });
-    return this.vehicleRepo.save(vehicle);
+    const savedVehicle = await this.vehicleRepo.save(vehicle);
+
+    await this.invalidateCache('vehicles:all');
+
+    return savedVehicle;
   }
 
   async findAll(): Promise<Vehicle[]> {
-    return this.vehicleRepo.find({ relations: { model: true } });
+    const cacheKey = 'vehicles:all';
+    const cachedVehicles = await this.redis.get<Vehicle[]>(cacheKey);
+    if (cachedVehicles) {
+      return cachedVehicles;
+    }
+
+    const vehicles = await this.vehicleRepo.find({
+      relations: { model: true },
+    });
+
+    await this.redis.set(cacheKey, vehicles);
+    return vehicles;
   }
 
   async findOne(id: string): Promise<Vehicle> {
+    const cacheKey = `vehicles:id:${id}`;
+    const cachedVehicle = await this.redis.get<Vehicle>(cacheKey);
+    if (cachedVehicle) {
+      return cachedVehicle;
+    }
+
     const vehicle = await this.vehicleRepo.findOne({
       where: { id },
       relations: { model: true },
     });
     if (!vehicle) {
-      throw new NotFoundException(`Vehicle com id "${id}" não encontrado`);
+      throw new NotFoundException(`Veículo não encontrado`);
     }
+
+    await this.redis.set(cacheKey, vehicle);
     return vehicle;
   }
 
@@ -67,12 +93,23 @@ export class VehiclesService {
     }
 
     Object.assign(vehicle, dto);
-    return this.vehicleRepo.save(vehicle);
+    const updatedVehicle = await this.vehicleRepo.save(vehicle);
+
+    await this.invalidateCache('vehicles:all');
+    await this.invalidateCache(`vehicles:id:${id}`);
+
+    return updatedVehicle;
   }
 
   async remove(id: string): Promise<void> {
     const vehicle = await this.findOne(id);
     await this.vehicleRepo.remove(vehicle);
+    await this.invalidateCache('vehicles:all');
+    await this.invalidateCache(`vehicles:id:${id}`);
+  }
+
+  private async invalidateCache(key: string): Promise<void> {
+    await this.redis.del(key);
   }
 
   private async assertModelExists(modelId: string): Promise<void> {

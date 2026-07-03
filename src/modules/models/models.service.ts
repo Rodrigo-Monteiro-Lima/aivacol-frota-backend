@@ -27,7 +27,7 @@ export class ModelsService {
   async findOne(id: string): Promise<Model> {
     const model = await this.modelRepo.findOne({ where: { id } });
     if (!model) {
-      throw new NotFoundException(`Model com id "${id}" não encontrado`);
+      throw new NotFoundException(`Modelo não encontrado`);
     }
     return model;
   }
@@ -50,7 +50,7 @@ export class ModelsService {
 
     if (vehicleCount > 0) {
       throw new ConflictException(
-        'Não é possível remover um model com veículos vinculados',
+        'Não é possível remover um modelo com veículos vinculados',
       );
     }
 
