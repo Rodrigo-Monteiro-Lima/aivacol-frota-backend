@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { ModelsService } from './models.service';
 import { Model } from './entities/model.entity';
@@ -15,6 +15,7 @@ describe('ModelsService', () => {
     find: jest.fn(),
     findOne: jest.fn(),
     remove: jest.fn(),
+    createQueryBuilder: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -58,7 +59,7 @@ describe('ModelsService', () => {
 
   describe('findOne', () => {
     it('deve retornar um model se encontrado', async () => {
-      const mockModel = { id: 'uuid-1', name: 'Sedan' };
+      const mockModel = { id: '1', name: 'Sedan' };
       jest.spyOn(repository, 'findOne').mockResolvedValue(mockModel as Model);
 
       const result = await service.findOne('uuid-1');
@@ -80,7 +81,7 @@ describe('ModelsService', () => {
   describe('create', () => {
     it('deve criar e salvar um novo model', async () => {
       const dto = { name: 'SUV' };
-      const savedModel = { id: 'uuid-2', name: 'SUV', created_by: 'aivacol' };
+      const savedModel = { id: '2', name: 'SUV', created_by: 'aivacol' };
 
       mockModelRepository.create.mockReturnValue(savedModel);
       mockModelRepository.save.mockResolvedValue(savedModel);
@@ -96,27 +97,56 @@ describe('ModelsService', () => {
   });
 
   describe('remove', () => {
-    it('deve remover model', async () => {
-      const mockModel = { id: 'uuid-1', name: 'Sedan' };
+    it('deve remover model sem veículos vinculados', async () => {
+      const mockModel = { id: '1', name: 'Sedan' };
       jest.spyOn(repository, 'findOne').mockResolvedValue(mockModel as Model);
       jest.spyOn(repository, 'remove').mockResolvedValue(mockModel as Model);
 
-      await service.remove('uuid-1');
+      const qbMock = {
+        leftJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getCount: jest.fn().mockResolvedValue(0),
+      };
 
+      jest
+        .spyOn(repository, 'createQueryBuilder')
+        .mockReturnValue(qbMock as any);
+
+      await service.remove('1');
       expect(mockModelRepository.remove).toHaveBeenCalledWith(mockModel);
+    });
+
+    it('deve impedir remoção de model com veículos vinculados', async () => {
+      const mockModel = { id: '1', name: 'Sedan' };
+      jest.spyOn(repository, 'findOne').mockResolvedValue(mockModel as Model);
+
+      const qbMock = {
+        leftJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getCount: jest.fn().mockResolvedValue(3),
+      };
+
+      jest
+        .spyOn(repository, 'createQueryBuilder')
+        .mockReturnValue(qbMock as any);
+
+      await expect(service.remove('1')).rejects.toThrow(ConflictException);
+      expect(mockModelRepository.remove).not.toHaveBeenCalled();
     });
   });
 
   describe('update', () => {
     it('deve atualizar e salvar um model existente', async () => {
-      const mockModel = { id: 'uuid-1', name: 'Sedan' };
+      const mockModel = { id: '1', name: 'Sedan' };
       const dto = { name: 'Sedan Atualizado' };
       const updatedModel = { ...mockModel, ...dto };
 
       jest.spyOn(repository, 'findOne').mockResolvedValue(mockModel as Model);
       mockModelRepository.save.mockResolvedValue(updatedModel);
 
-      const result = await service.update('uuid-1', dto);
+      const result = await service.update('1', dto);
 
       expect(result).toEqual(updatedModel);
       expect(mockModelRepository.save).toHaveBeenCalledWith(
