@@ -13,17 +13,15 @@ import {
 import { ModelsService } from './models.service';
 import { CreateModelDto } from './dto/create-model.dto';
 import { UpdateModelDto } from './dto/update-model.dto';
-import * as currentUserDecorator from '../../common/decorators/current-user.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { RequestUser } from '../../common/decorators/current-user.decorator';
 
 @Controller('models')
 export class ModelsController {
   constructor(private readonly modelsService: ModelsService) {}
 
   @Post()
-  create(
-    @Body() dto: CreateModelDto,
-    @currentUserDecorator.CurrentUser() user: currentUserDecorator.RequestUser,
-  ) {
+  create(@Body() dto: CreateModelDto, @CurrentUser() user: RequestUser) {
     return this.modelsService.create(dto, user.nickname);
   }
 

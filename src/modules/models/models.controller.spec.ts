@@ -59,11 +59,13 @@ describe('ModelsController', () => {
   describe('create', () => {
     it('deve chamar o service passando o dto e o criador padrão', async () => {
       const dto = { name: 'Caminhão' };
+      const mockUser = { userId: '1', nickname: 'aivacol' };
+
       jest
         .spyOn(service, 'create')
         .mockResolvedValue({ id: '1', ...dto } as any);
 
-      await controller.create(dto);
+      await controller.create(dto, mockUser);
       expect(mockModelsService.create).toHaveBeenCalledWith(dto, 'aivacol');
     });
   });
