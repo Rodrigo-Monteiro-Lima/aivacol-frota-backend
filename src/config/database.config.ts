@@ -1,6 +1,7 @@
 import { Vehicle } from '../modules/vehicles/entities/vehicle.entity';
 import { Model } from '../modules/models/entities/model.entity';
 import { DataSourceOptions } from 'typeorm';
+import { User } from '../modules/users/entities/user.entity';
 
 export const typeOrmConfig = (): DataSourceOptions => ({
   type: 'mssql',
@@ -9,7 +10,7 @@ export const typeOrmConfig = (): DataSourceOptions => ({
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
-  entities: [Model, Vehicle],
+  entities: [Model, Vehicle, User],
   migrations: [__dirname + '/../database/migrations/*{.ts,.js}'],
   synchronize: false,
   logging: process.env.NODE_ENV === 'development',

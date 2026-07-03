@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ModelsController } from './models.controller';
 import { ModelsService } from './models.service';
+import { Model } from './entities/model.entity';
 
 describe('ModelsController', () => {
   let controller: ModelsController;
@@ -41,6 +42,17 @@ describe('ModelsController', () => {
       const result = await controller.findAll();
       expect(result).toEqual(expectedResult);
       expect(mockModelsService.findAll).toHaveBeenCalled();
+    });
+  });
+
+  describe('findOne', () => {
+    it('deve retornar um model se encontrado', async () => {
+      const expectedResult = { id: '1', name: 'Hatch' };
+      jest.spyOn(service, 'findOne').mockResolvedValue(expectedResult as Model);
+
+      const result = await controller.findOne('1');
+      expect(result).toEqual(expectedResult);
+      expect(mockModelsService.findOne).toHaveBeenCalled();
     });
   });
 

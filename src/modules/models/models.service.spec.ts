@@ -37,6 +37,24 @@ describe('ModelsService', () => {
   it('deve estar definido', () => {
     expect(service).toBeDefined();
   });
+  describe('findAll', () => {
+    it('deve retornar um array de models', async () => {
+      const mockModel = [{ id: '1', name: 'Hatch' }];
+      jest.spyOn(repository, 'find').mockResolvedValue(mockModel as Model[]);
+
+      const result = await service.findAll();
+      expect(result).toEqual(mockModel);
+      expect(mockModelRepository.find).toHaveBeenCalledWith();
+    });
+
+    it('deve lançar NotFoundException se o model não existir', async () => {
+      jest.spyOn(repository, 'findOne').mockResolvedValue(null);
+
+      await expect(service.findOne('uuid-invalido')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
 
   describe('findOne', () => {
     it('deve retornar um model se encontrado', async () => {
@@ -83,9 +101,36 @@ describe('ModelsService', () => {
       jest.spyOn(repository, 'findOne').mockResolvedValue(mockModel as Model);
       jest.spyOn(repository, 'remove').mockResolvedValue(mockModel as Model);
 
-      await service.remove('model-uuid-1');
+      await service.remove('uuid-1');
 
       expect(mockModelRepository.remove).toHaveBeenCalledWith(mockModel);
+    });
+  });
+
+  describe('update', () => {
+    it('deve atualizar e salvar um model existente', async () => {
+      const mockModel = { id: 'uuid-1', name: 'Sedan' };
+      const dto = { name: 'Sedan Atualizado' };
+      const updatedModel = { ...mockModel, ...dto };
+
+      jest.spyOn(repository, 'findOne').mockResolvedValue(mockModel as Model);
+      mockModelRepository.save.mockResolvedValue(updatedModel);
+
+      const result = await service.update('uuid-1', dto);
+
+      expect(result).toEqual(updatedModel);
+      expect(mockModelRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining(dto),
+      );
+    });
+
+    it('deve lançar NotFoundException se tentar atualizar model inexistente', async () => {
+      jest.spyOn(repository, 'findOne').mockResolvedValue(null);
+
+      await expect(
+        service.update('uuid-invalido', { name: 'X' }),
+      ).rejects.toThrow(NotFoundException);
+      expect(mockModelRepository.save).not.toHaveBeenCalled();
     });
   });
 });

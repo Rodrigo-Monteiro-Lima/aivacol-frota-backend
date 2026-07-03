@@ -13,14 +13,18 @@ import {
 import { ModelsService } from './models.service';
 import { CreateModelDto } from './dto/create-model.dto';
 import { UpdateModelDto } from './dto/update-model.dto';
+import * as currentUserDecorator from '../../common/decorators/current-user.decorator';
 
 @Controller('models')
 export class ModelsController {
   constructor(private readonly modelsService: ModelsService) {}
 
   @Post()
-  create(@Body() dto: CreateModelDto) {
-    return this.modelsService.create(dto, 'aivacol');
+  create(
+    @Body() dto: CreateModelDto,
+    @currentUserDecorator.CurrentUser() user: currentUserDecorator.RequestUser,
+  ) {
+    return this.modelsService.create(dto, user.nickname);
   }
 
   @Get()
