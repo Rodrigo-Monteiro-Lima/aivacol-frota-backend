@@ -69,27 +69,40 @@ async function seedVehicles(dataSource: DataSource): Promise<void> {
   }
 
   for (const vehicleData of data.vehicles) {
-    const exists = await vehicleRepo.findOne({
-      where: { license_plate: vehicleData.license_plate },
-    });
-    if (exists) continue;
+    try {
+      const exists = await vehicleRepo.findOne({
+        where: [
+          { license_plate: vehicleData.license_plate },
+          { chassis: vehicleData.chassis },
+          { renavam: vehicleData.renavam },
+        ],
+      });
+      if (exists) continue;
 
-    const modelId = modelNameToId.get(vehicleData.model_name);
-    if (!modelId) {
-      console.warn(
-        `[vehicle] model "${vehicleData.model_name}" não encontrado, pulando "${vehicleData.license_plate}".`,
+      const modelId = modelNameToId.get(vehicleData.model_name);
+      if (!modelId) {
+        console.warn(
+          `[vehicle] model "${vehicleData.model_name}" não encontrado, pulando "${vehicleData.license_plate}".`,
+        );
+        continue;
+      }
+
+      await vehicleRepo.save(
+        vehicleRepo.create({
+          ...vehicleData,
+          model_id: modelId,
+          created_by: 'seed',
+        }),
       );
-      continue;
+      console.log(
+        `[vehicle] "${vehicleData.license_plate}" criado com sucesso.`,
+      );
+    } catch (error) {
+      console.log(error);
+      console.error(
+        `[vehicle] Erro ao inserir ${JSON.stringify(vehicleData)}: Dados únicos já existentes no banco.`,
+      );
     }
-
-    await vehicleRepo.save(
-      vehicleRepo.create({
-        ...vehicleData,
-        model_id: modelId,
-        created_by: 'seed',
-      }),
-    );
-    console.log(`[vehicle] "${vehicleData.license_plate}" criado.`);
   }
 }
 
