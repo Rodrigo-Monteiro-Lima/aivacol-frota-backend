@@ -10,6 +10,7 @@ import { Model } from '../models/entities/model.entity';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { RedisService } from '../../redis/redis.service';
+import { MessagingService } from '../../messaging/messaging.service';
 
 @Injectable()
 export class VehiclesService {
@@ -19,6 +20,7 @@ export class VehiclesService {
     @InjectRepository(Model)
     private readonly modelRepo: Repository<Model>,
     private readonly redis: RedisService,
+    private readonly messaging: MessagingService,
   ) {}
 
   async create(dto: CreateVehicleDto, createdBy: string): Promise<Vehicle> {
@@ -29,6 +31,11 @@ export class VehiclesService {
     const savedVehicle = await this.vehicleRepo.save(vehicle);
 
     await this.invalidateCache('vehicles:all');
+    await this.messaging.publish('vehicle.created', {
+      id: savedVehicle.id,
+      license_plate: savedVehicle.license_plate,
+      created_by: createdBy,
+    });
 
     return savedVehicle;
   }
@@ -96,6 +103,10 @@ export class VehiclesService {
 
     await this.invalidateCache('vehicles:all');
     await this.invalidateCache(`vehicles:id:${id}`);
+    await this.messaging.publish('vehicle.updated', {
+      id: updatedVehicle.id,
+      changes: dto,
+    });
 
     return updatedVehicle;
   }
@@ -105,6 +116,7 @@ export class VehiclesService {
     await this.vehicleRepo.remove(vehicle);
     await this.invalidateCache('vehicles:all');
     await this.invalidateCache(`vehicles:id:${id}`);
+    await this.messaging.publish('vehicle.deleted', { id });
   }
 
   private async invalidateCache(key: string): Promise<void> {
@@ -114,7 +126,7 @@ export class VehiclesService {
   private async assertModelExists(modelId: string): Promise<void> {
     const model = await this.modelRepo.findOne({ where: { id: modelId } });
     if (!model) {
-      throw new NotFoundException(`Model com id "${modelId}" não encontrado`);
+      throw new NotFoundException(`Modelo não encontrado`);
     }
   }
 

@@ -77,6 +77,7 @@ services:
       DB_HOST: sqlserver
       DATABASE_HOST: sqlserver
       REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
     env_file:
       - .env
     volumes:
@@ -87,11 +88,55 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     networks:
       - aivacol-net
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: aivacol-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - aivacol-net
+
+  aivacol-consumer:
+    container_name: aivacol-consumer
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    restart: always
+    environment:
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npx ts-node -r tsconfig-paths/register scripts/vehicle-events-consumer.ts
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - aivacol-net
+
 volumes:
   sqlserver-data:
   redis-data:
+  rabbitmq-data:
 
 networks:
   aivacol-net:
