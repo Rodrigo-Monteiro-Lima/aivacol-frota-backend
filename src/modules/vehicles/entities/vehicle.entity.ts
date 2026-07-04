@@ -19,7 +19,7 @@ export class Vehicle extends BaseEntity {
   @Column({ type: 'int' })
   year!: number;
 
-  @ManyToOne(() => Model, (model) => model.vehicles, { onDelete: 'NO ACTION' })
+  @ManyToOne(() => Model, (model) => model.vehicles, { onDelete: 'TION' })
   @JoinColumn({ name: 'model_id' })
   model!: Model;
 
