@@ -1,4 +1,3 @@
-// src/modules/vehicles/vehicles.controller.ts
 import {
   Body,
   Controller,
