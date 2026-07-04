@@ -5,9 +5,12 @@ COPY package*.json ./
 FROM base AS development
 RUN npm ci
 COPY . .
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 EXPOSE 3000
 # CMD ["npm", "run", "start:dev"]
-CMD npm run seed || true && npm run start:dev
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["npm", "run", "start:dev"]
 
 FROM base AS build
 RUN npm ci

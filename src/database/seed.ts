@@ -8,11 +8,13 @@ import { typeOrmConfig } from '../config/database.config';
 import { User } from '../modules/users/entities/user.entity';
 import { Model } from '../modules/models/entities/model.entity';
 import { Vehicle } from '../modules/vehicles/entities/vehicle.entity';
+import { Brand } from '../modules/brands/entities/brand.entity';
 
 dotenv.config();
 
 interface SeedData {
-  models: Array<{ name: string }>;
+  brands: Array<{ name: string }>;
+  models: Array<{ name: string; brand_name: string }>;
   vehicles: Array<{
     license_plate: string;
     chassis: string;
@@ -47,6 +49,7 @@ async function seedUser(dataSource: DataSource): Promise<void> {
 }
 
 async function seedVehicles(dataSource: DataSource): Promise<void> {
+  const brandRepo = dataSource.getRepository(Brand);
   const modelRepo = dataSource.getRepository(Model);
   const vehicleRepo = dataSource.getRepository(Vehicle);
 
@@ -55,13 +58,36 @@ async function seedVehicles(dataSource: DataSource): Promise<void> {
     fs.readFileSync(filePath, 'utf-8'),
   ) as SeedData;
 
+  const brandNameToId = new Map<string, string>();
   const modelNameToId = new Map<string, string>();
+
+  for (const brandData of data.brands) {
+    let brand = await brandRepo.findOne({ where: { name: brandData.name } });
+    if (!brand) {
+      brand = await brandRepo.save(
+        brandRepo.create({ name: brandData.name, created_by: 'seed' }),
+      );
+      console.log(`[brand] "${brandData.name}" criado.`);
+    }
+    brandNameToId.set(brandData.name, brand.id);
+  }
 
   for (const modelData of data.models) {
     let model = await modelRepo.findOne({ where: { name: modelData.name } });
     if (!model) {
+      const brandId = brandNameToId.get(modelData.brand_name);
+      if (!brandId) {
+        console.warn(
+          `[model] Marca "${modelData.brand_name}" não encontrada para o modelo "${modelData.name}". Pulando.`,
+        );
+        continue;
+      }
       model = await modelRepo.save(
-        modelRepo.create({ name: modelData.name, created_by: 'seed' }),
+        modelRepo.create({
+          name: modelData.name,
+          brand_id: brandId,
+          created_by: 'seed',
+        }),
       );
       console.log(`[model] "${modelData.name}" criado.`);
     }
@@ -109,7 +135,7 @@ async function seedVehicles(dataSource: DataSource): Promise<void> {
 async function main() {
   const dataSource = new DataSource({
     ...typeOrmConfig(),
-    entities: [User, Model, Vehicle],
+    entities: [User, Model, Vehicle, Brand],
   });
   await dataSource.initialize();
 

@@ -1,9 +1,13 @@
 {
+  "brands": [
+    { "name": "Chevrolet" },
+    { "name": "Volkswagen" },
+    { "name": "Fiat" }
+  ],
   "models": [
-    { "name": "Sprinter" },
-    { "name": "Daily" },
-    { "name": "HR" },
-    { "name": "Constellation" }
+    { "name": "Onix", "brand_name": "Chevrolet" },
+    { "name": "Gol", "brand_name": "Volkswagen" },
+    { "name": "Uno", "brand_name": "Fiat" }
   ],
   "vehicles": [
     {
@@ -11,28 +15,28 @@
       "chassis": "9BWZZZ377VT004251",
       "renavam": "12345678901",
       "year": 2022,
-      "model_name": "Sprinter"
+      "model_name": "Onix"
     },
     {
       "license_plate": "XYZ9E88",
       "chassis": "9BWZZZ377VT004987",
       "renavam": "98765432100",
       "year": 2021,
-      "model_name": "Daily"
+      "model_name": "Gol"
     },
     {
       "license_plate": "JKL4F56",
       "chassis": "9BWZZZ377VT005122",
       "renavam": "11223344556",
       "year": 2023,
-      "model_name": "HR"
+      "model_name": "Uno"
     },
     {
       "license_plate": "MNO7G12",
       "chassis": "9BWZZZ377VT005890",
       "renavam": "22334455667",
       "year": 2020,
-      "model_name": "Constellation"
+      "model_name": "Onix"
     }
   ]
 }
