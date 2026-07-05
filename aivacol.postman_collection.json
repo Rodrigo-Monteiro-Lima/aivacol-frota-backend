@@ -1,0 +1,678 @@
+{
+  "info": {
+    "_postman_id": "ac1ea0ce-e413-4a81-8075-46f1b1d61dd0",
+    "name": "aivacol",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "54291952",
+    "_collection_link": "https://go.postman.co/collection/54291952-ac1ea0ce-e413-4a81-8075-46f1b1d61dd0?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Model",
+      "item": [
+        {
+          "name": "Get models",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code 200\", function () {",
+                  "    pm.expect(pm.response.code).to.equal(200);",
+                  "    const jsonData = pm.response.json();",
+                  "    if (Array.isArray(jsonData) && jsonData.length > 0) {",
+                  "        const firstModel = jsonData[0];",
+                  "        if (firstModel.id) {",
+                  "            pm.collectionVariables.set('MODEL_ID', firstModel.id);",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{URL}}/models",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "models"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get model by id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{URL}}/models/{{MODEL_ID}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "models",
+                "{{MODEL_ID}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "UPDATE model",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Onix\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}/models/{{MODEL_ID}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "models",
+                "{{MODEL_ID}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create model",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Rodrigo2\",\n    \"brand_id\": \"110D433E-F36B-1410-847C-005FC176496D\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}/models",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "models"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE model",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{URL}}/models/{{MODEL_ID}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "models",
+                "{{MODEL_ID}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Brand",
+      "item": [
+        {
+          "name": "Get brand",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code 200\", function () {",
+                  "    pm.expect(pm.response.code).to.equal(200);",
+                  "    const jsonData = pm.response.json();",
+                  "    if (Array.isArray(jsonData) && jsonData.length > 0) {",
+                  "        const firstBrand = jsonData[0];",
+                  "        if (firstBrand.id) {",
+                  "            pm.collectionVariables.set('BRAND_ID', firstBrand.id);",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{URL}}/brands",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "brands"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get brand by id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{URL}}/brands/{{BRAND_ID}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "brands",
+                "{{BRAND_ID}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "UPDATE brand",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"BMW\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}/brands/{{BRAND_ID}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "brands",
+                "{{BRAND_ID}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create brand",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"BMW\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}/brands",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "brands"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE brand",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Rodrigo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}/brands/{{BRAND_ID}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "brands",
+                "{{BRAND_ID}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Vehicle",
+      "item": [
+        {
+          "name": "Get vehicles",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code 200\", function () {",
+                  "    pm.expect(pm.response.code).to.equal(200);",
+                  "    const jsonData = pm.response.json();",
+                  "    if (Array.isArray(jsonData) && jsonData.length > 0) {",
+                  "        const firstVehicle = jsonData[0];",
+                  "        if (firstVehicle.id) {",
+                  "            pm.collectionVariables.set('VEHICLE_ID', firstVehicle.id);",
+                  "        }",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{URL}}/vehicles",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "vehicles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get vehicle by id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{URL}}/vehicles/{{VEHICLE_ID}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "vehicles",
+                "{{VEHICLE_ID}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "UPDATE vehicle",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"license_plate\": \"ABC1D26\"\n  //\"chassis\": \"9BWZZZ37ZVT000001\",\n  //\"renavam\": \"12345678901\",\n  //\"year\": 2024,\n  //\"model_id\": \"5D02433E-F36B-1410-899A-00460E9E7F80\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}/vehicles/{{VEHICLE_ID}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "vehicles",
+                "{{VEHICLE_ID}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create vehicle",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"license_plate\": \"ABC1D27\",\n  \"chassis\": \"9BWZZZ37ZVT000004\",\n  \"renavam\": \"12345678904\",\n  \"year\": 2024,\n  \"model_id\": \"260D433E-F36B-1410-847C-005FC176496D\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}/vehicles",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "vehicles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE vehicle",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Rodrigo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}/vehicles/{{VEHICLE_ID}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "vehicles",
+                "{{VEHICLE_ID}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Response status code is 200\", function () {",
+              "    pm.expect(pm.response.code).to.equal(200);",
+              "    const jsonData = pm.response.json();",
+              "    'access_token' in jsonData && pm.collectionVariables.set('USER_TOKEN', jsonData.access_token)",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{USER_TOKEN}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nickname\": \"aivacol\",\n  \"password\": \"aivacol123\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{URL}}/auth/login",
+          "host": [
+            "{{URL}}"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "URL",
+      "value": ""
+    },
+    {
+      "key": "USER_TOKEN",
+      "value": ""
+    },
+    {
+      "key": "MODEL_ID",
+      "value": ""
+    },
+    {
+      "key": "VEHICLE_ID",
+      "value": ""
+    },
+    {
+      "key": "BRAND_ID",
+      "value": ""
+    }
+  ]
+}

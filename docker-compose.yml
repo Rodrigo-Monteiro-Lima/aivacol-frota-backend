@@ -7,7 +7,7 @@ services:
     platform: linux/amd64
     environment:
       ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "Aivacol123456!"
+      MSSQL_SA_PASSWORD: "${DB_PASSWORD}"
       MSSQL_PID: "Express"
     ports:
       - "1433:1433"
@@ -23,7 +23,7 @@ services:
           "-U",
           "sa",
           "-P",
-          "Aivacol123456!",
+          "${DB_PASSWORD}",
           "-Q",
           "SELECT 1",
           "-C",
@@ -47,7 +47,7 @@ services:
       - aivacol-net
     command: >
       /bin/bash -c "
-      /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P 'Aivacol123456!' -C -i /usr/config/init.sql
+      /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P '${DB_PASSWORD}' -C -i /usr/config/init.sql
       "
   redis:
     image: redis:7-alpine
@@ -75,17 +75,18 @@ services:
     restart: always
     environment:
       DB_HOST: sqlserver
-      DATABASE_HOST: sqlserver
-      REDIS_URL: redis://redis:6379
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      MONGO_URL: mongodb://mongo:27017
     env_file:
       - .env
     volumes:
       - .:/app
       - /app/node_modules
     depends_on:
-      sqlserver:
-        condition: service_healthy
+      sqlserver-init:
+        condition: service_completed_successfully
       redis:
         condition: service_healthy
       rabbitmq:
