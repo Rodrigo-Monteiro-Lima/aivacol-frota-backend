@@ -90,6 +90,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      mongo:
+        condition: service_healthy
     networks:
       - aivacol-net
 
@@ -133,10 +135,26 @@ services:
     networks:
       - aivacol-net
 
+  mongo:
+    image: mongo:7
+    container_name: aivacol-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - aivacol-net
+
 volumes:
   sqlserver-data:
   redis-data:
   rabbitmq-data:
+  mongo-data:
 
 networks:
   aivacol-net:

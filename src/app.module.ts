@@ -12,6 +12,7 @@ import { VehiclesModule } from './modules/vehicles/vehicles.module';
 import { RedisModule } from './redis/redis.module';
 import { BrandsModule } from './modules/brands/brands.module';
 import { MessagingModule } from './messaging/messaging.module';
+import { AuditModule } from './audit/audit.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { MessagingModule } from './messaging/messaging.module';
     VehiclesModule,
     BrandsModule,
     MessagingModule,
+    AuditModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: JwtAuthGuard }],
