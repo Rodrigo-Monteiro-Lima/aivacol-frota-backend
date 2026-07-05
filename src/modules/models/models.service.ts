@@ -8,14 +8,18 @@ import { Repository } from 'typeorm';
 import { Model } from './entities/model.entity';
 import { CreateModelDto } from './dto/create-model.dto';
 import { UpdateModelDto } from './dto/update-model.dto';
+import { Brand } from '../brands/entities/brand.entity';
 
 @Injectable()
 export class ModelsService {
   constructor(
     @InjectRepository(Model) private readonly modelRepo: Repository<Model>,
+    @InjectRepository(Brand)
+    private readonly brandRepo: Repository<Brand>,
   ) {}
 
   async create(dto: CreateModelDto, createdBy: string): Promise<Model> {
+    await this.assertBrandExists(dto.brand_id);
     const model = this.modelRepo.create({ ...dto, created_by: createdBy });
     return this.modelRepo.save(model);
   }
@@ -55,5 +59,12 @@ export class ModelsService {
     }
 
     await this.modelRepo.remove(model);
+  }
+
+  private async assertBrandExists(brandId: string): Promise<void> {
+    const model = await this.brandRepo.findOne({ where: { id: brandId } });
+    if (!model) {
+      throw new NotFoundException(`Marca não encontrada`);
+    }
   }
 }

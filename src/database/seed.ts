@@ -78,7 +78,7 @@ async function seedVehicles(dataSource: DataSource): Promise<void> {
       const brandId = brandNameToId.get(modelData.brand_name);
       if (!brandId) {
         console.warn(
-          `[model] Marca "${modelData.brand_name}" não encontrada para o modelo "${modelData.name}". Pulando.`,
+          `[model] Marca "${modelData.brand_name}" não encontrada para o modelo "${modelData.name}".`,
         );
         continue;
       }

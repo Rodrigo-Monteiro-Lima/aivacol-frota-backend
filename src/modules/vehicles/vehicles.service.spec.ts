@@ -5,6 +5,7 @@ import { VehiclesService } from './vehicles.service';
 import { Vehicle } from './entities/vehicle.entity';
 import { Model } from '../models/entities/model.entity';
 import { RedisService } from '../../redis/redis.service';
+import { MessagingService } from '../../messaging/messaging.service';
 
 describe('VehiclesService', () => {
   let service: VehiclesService;
@@ -28,6 +29,10 @@ describe('VehiclesService', () => {
     del: jest.fn(),
   };
 
+  const mockMessagingService = {
+    publish: jest.fn().mockResolvedValue(undefined),
+  };
+
   const createDto = {
     license_plate: 'ABC1D23',
     chassis: '9BWZZZ377VT004251',
@@ -43,6 +48,7 @@ describe('VehiclesService', () => {
         { provide: getRepositoryToken(Vehicle), useValue: mockVehicleRepo },
         { provide: getRepositoryToken(Model), useValue: mockModelRepo },
         { provide: RedisService, useValue: mockRedisService },
+        { provide: MessagingService, useValue: mockMessagingService },
       ],
     }).compile();
 

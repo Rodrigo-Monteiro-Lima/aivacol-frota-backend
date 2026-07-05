@@ -93,8 +93,12 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
     "coveragePathIgnorePatterns": [
+      "node_modules",
+      "public.decorator.ts",
+      "jwt-auth.guard.ts",
+      "audit.interceptor.ts",
       "main.ts",
-      "app.module.ts",
+      ".module.ts",
       ".module.ts$",
       ".dto.ts$",
       ".entity.ts$",

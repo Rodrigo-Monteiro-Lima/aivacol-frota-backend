@@ -31,7 +31,7 @@ export class VehiclesService {
     const savedVehicle = await this.vehicleRepo.save(vehicle);
 
     await this.invalidateCache('vehicles:all');
-    await this.messaging.publish('vehicle.created', {
+    this.messaging.publish('vehicle.created', {
       id: savedVehicle.id,
       license_plate: savedVehicle.license_plate,
       created_by: createdBy,
@@ -103,7 +103,7 @@ export class VehiclesService {
 
     await this.invalidateCache('vehicles:all');
     await this.invalidateCache(`vehicles:id:${id}`);
-    await this.messaging.publish('vehicle.updated', {
+    this.messaging.publish('vehicle.updated', {
       id: updatedVehicle.id,
       changes: dto,
     });
@@ -116,7 +116,7 @@ export class VehiclesService {
     await this.vehicleRepo.remove(vehicle);
     await this.invalidateCache('vehicles:all');
     await this.invalidateCache(`vehicles:id:${id}`);
-    await this.messaging.publish('vehicle.deleted', { id });
+    this.messaging.publish('vehicle.deleted', { id });
   }
 
   private async invalidateCache(key: string): Promise<void> {

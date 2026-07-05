@@ -9,7 +9,7 @@ const QUEUE = 'vehicle-events-logger';
 async function main() {
   const url = process.env.RABBITMQ_URL;
   if (!url) {
-    console.error('RABBITMQ_URL não configurada. Encerrando.');
+    console.error('RABBITMQ_URL não configurada.');
     process.exit(1);
   }
 

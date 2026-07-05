@@ -4,6 +4,7 @@ import { ConflictException, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { ModelsService } from './models.service';
 import { Model } from './entities/model.entity';
+import { Brand } from '../brands/entities/brand.entity';
 
 describe('ModelsService', () => {
   let service: ModelsService;
@@ -18,6 +19,12 @@ describe('ModelsService', () => {
     createQueryBuilder: jest.fn(),
   };
 
+  const mockBrandRepo = {
+    findOne: jest.fn(),
+  };
+
+  const dto = { name: 'SUV', brand_id: '1' };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -26,6 +33,7 @@ describe('ModelsService', () => {
           provide: getRepositoryToken(Model),
           useValue: mockModelRepository,
         },
+        { provide: getRepositoryToken(Brand), useValue: mockBrandRepo },
       ],
     }).compile();
 
@@ -46,14 +54,6 @@ describe('ModelsService', () => {
       const result = await service.findAll();
       expect(result).toEqual(mockModel);
       expect(mockModelRepository.find).toHaveBeenCalledWith();
-    });
-
-    it('deve lançar NotFoundException se o model não existir', async () => {
-      jest.spyOn(repository, 'findOne').mockResolvedValue(null);
-
-      await expect(service.findOne('invalido')).rejects.toThrow(
-        NotFoundException,
-      );
     });
   });
 
@@ -80,9 +80,8 @@ describe('ModelsService', () => {
 
   describe('create', () => {
     it('deve criar e salvar um novo model', async () => {
-      const dto = { name: 'SUV' };
       const savedModel = { id: '2', name: 'SUV', created_by: 'aivacol' };
-
+      mockBrandRepo.findOne.mockResolvedValue({ id: '1' });
       mockModelRepository.create.mockReturnValue(savedModel);
       mockModelRepository.save.mockResolvedValue(savedModel);
 
@@ -93,6 +92,15 @@ describe('ModelsService', () => {
         created_by: 'aivacol',
       });
       expect(mockModelRepository.save).toHaveBeenCalledWith(savedModel);
+    });
+
+    it('deve lançar NotFoundException se o brand_id não existir', async () => {
+      mockBrandRepo.findOne.mockResolvedValue(null);
+
+      await expect(service.create(dto, 'aivacol')).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(mockModelRepository.save).not.toHaveBeenCalled();
     });
   });
 

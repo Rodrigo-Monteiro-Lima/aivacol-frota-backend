@@ -45,10 +45,7 @@ export class MessagingService implements OnModuleInit, OnModuleDestroy {
     await this.connection?.close().catch(() => undefined);
   }
 
-  async publish(
-    routingKey: string,
-    payload: Record<string, unknown>,
-  ): Promise<void> {
+  publish(routingKey: string, payload: Record<string, unknown>): void {
     if (!this.channel) return;
 
     try {

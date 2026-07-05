@@ -13,7 +13,6 @@
     "target": "ES2023",
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDirs": ["./src"],
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
@@ -26,5 +25,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*", "scripts/**/*"]
+  "include": ["src/**/*", "scripts/**/*", "test/**/*"]
 }
